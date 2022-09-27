@@ -1,12 +1,51 @@
-const express = require('express');
-const dotenv = require('dotenv');
+//////requirements and variables
+const express = require("express");
+const dotenv = require("dotenv");
+const morgan = require("morgan");
+const colors = require("colors")
 
-dotenv.config({ path: './config/config.env'});
+//<!--const logger = require('./middleware/logger');-->
+const bootcamps = require("./routes/bootcamps");
+const connectDB = require("./config/db");
+const errorHandler = require("./middleware/errorHandler")
 
-const app = express ();
+dotenv.config({ path: "./config/config.env" });
+const nodeENV = process.env.NODE_ENV;
+const nodePORT = process.env.PORT;
 
-const PORT = process.env.PORT || 5000;
+connectDB();
+//////////////app
+const app = express();
 
-app.listen(PORT, 
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+//body parser
+app.use(express.json());
+
+//////////middleware
+//app.use(logger)
+//we do not need to use the middleware 'logger' 
+//because of the package MORGAN, which send us the data that we coded in logger.js and more.
+if (nodeENV === "development") {
+  app.use(morgan("dev"));
+}
+
+//bringing in our routers
+app.use("/api/v1/bootcamps", bootcamps);
+
+//middleware erros handling
+app.use(errorHandler);
+
+//our PORT
+const PORT = nodePORT || 5000;
+
+//putting app.listen in a variable, meaning to shut down the action when some error accessing the database occurs:
+const server = app.listen(
+  PORT,
+  console.log(`Server running in ${nodeENV} mode on port ${PORT}`.yellow.bold)
 );
+
+//Handling promises rejections
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`.red);
+  //close with the failure error (1)
+  server.close(() => process.exit(1))
+})
