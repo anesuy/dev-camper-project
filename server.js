@@ -5,11 +5,11 @@ const morgan = require("morgan");
 const colors = require("colors")
 
 //<!--const logger = require('./middleware/logger');-->
+dotenv.config({ path: "./config/config.env" });
 const bootcamps = require("./routes/bootcamps");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler")
 
-dotenv.config({ path: "./config/config.env" });
 const nodeENV = process.env.NODE_ENV;
 const nodePORT = process.env.PORT;
 
